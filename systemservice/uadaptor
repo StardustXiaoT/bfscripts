@@ -1,0 +1,57 @@
+#!/bin/bash
+#chkconfig:2345 78 50
+#description:QPCUA
+#processname:uadaptor
+
+
+. /etc/init.d/functions
+
+SERVICE_NAME=dataloggger
+PATH_TO_JAR=/root/wp2/opcua_adapter
+JARNAME=OpcUa-Kafka-Adapter-0.0.1-SNAPSHOT.jar
+PID_PATH_NAME=/var/run/uadaptor.pid
+case $1 in
+    start)
+        echo "Starting $SERVICE_NAME ..."
+        if [ ! -f $PID_PATH_NAME ]; then
+	    cd $PATH_TO_JAR
+            nohup java -jar $JARNAME >> ua`date +%Y%m%d%H%M%S`.out 2>&1 &
+#	    if [ $? ne 0 ];then
+#		exit 1
+#	    echo "OPCUA service for datalogger doenst initialized properly, please connect to datalogger first"
+#	    else
+                        echo $! > $PID_PATH_NAME
+#           fi
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stoping ..."
+            kill $PID;
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH_NAME
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stopping ...";
+            kill $PID;
+            echo "$SERVICE_NAME stopped ...";
+            rm $PID_PATH_NAME
+            echo "$SERVICE_NAME starting ..."
+	    cd $PATH_TO_JAR
+            nohup java -jar $JARNAME >> ua`date +%Y%m%d%H%M%S`.out 2>&1 &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+esac

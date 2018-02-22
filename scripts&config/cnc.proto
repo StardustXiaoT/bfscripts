@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+/////////////////////////////////////////////////////////////////////
+// messages sent from CNC to server
+/////////////////////////////////////////////////////////////////////
+
+// Topic: cnc/{station}/status;//{station} means different station machine
+message CncStatus {
+    // Time when the event was generated
+    google.protobuf.Timestamp time = 1;
+    double rotate_speed = 2;
+    double current = 3;
+    double torque = 4;
+    int32 program_status = 5;
+    int32 axis_status = 6;
+    int32 cnc_status = 7;
+    int32  status = 8;
+    string gcode = 9;
+    float  gcode_num = 10;
+    int32  tool_num = 11; 
+    string id = 12;
+    string macaddr = 13;
+     
+}
+

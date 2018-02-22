@@ -1,0 +1,24 @@
+[Unit]
+Description=www.js
+After=network.target
+After=network-online.target       
+# Requires the mysql service to run first
+
+[Service]
+ExecStartPre=/bin/sleep 15
+ExecStart=/usr/local/bin/node /root/wp4/build/bin/www.js
+# Required on some systems
+WorkingDirectory=/root/wp4/build/bin
+Restart=always
+ # Restart service after 10 seconds if node service crashes
+ RestartSec=16
+ # Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nodejs-wp4
+#User=<alternate user>
+#Group=<alternate group>
+Environment=NODE_ENV=prod
+
+[Install]
+WantedBy=multi-user.target

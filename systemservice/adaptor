@@ -1,0 +1,57 @@
+#!/bin/bash
+#chkconfig:2345 90 50
+#description:mqtt&kafka adaptor
+#processname:adaptor
+
+
+ . /etc/init.d/functions
+
+#export JAVA_HOME=/opt/jdk1.8.0_151
+#export JRE_HOME=/opt/jdk1.8.0_151/jre
+
+
+SERVICE_NAME=mkadaptor
+PATH_TO_JAR=/root/wp2/mqtt_adaptor
+#PATH_TO_JAR=/root/wp2/mqtt_adaptor/Mqtt-Kafka-Adapter-0.0.1-SNAPSHOT.jar
+JARNAME=Mqtt-Kafka-Adapter-0.0.1-SNAPSHOT.jar
+PID_PATH_NAME=/var/run/adaptor.pid
+case $1 in
+    start)
+        echo "Starting $SERVICE_NAME ..."
+        if [ ! -f $PID_PATH_NAME ]; then
+	    cd $PATH_TO_JAR
+            nohup java -jar $JARNAME >> adapter`date +%Y%m%d%H%M%S`.out 2>&1 &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stoping ..."
+            kill -15 $PID;
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH_NAME
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stopping ...";
+            kill -15 $PID;
+            echo "$SERVICE_NAME stopped ...";
+            rm $PID_PATH_NAME
+            echo "$SERVICE_NAME starting ..."
+	    cd $PATH_TO_JAR
+            nohup java -jar $JARNAME >> adapter`date +%Y%m%d%H%M%S`.out 2>&1 &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+esac

@@ -1,0 +1,22 @@
+[Unit]
+Description=mongodb
+#Requires=After=mysql.service       # Requires the mysql service to run first
+Before=nodeserver.service
+
+[Service]
+ExecStart=/opt/mongodb-linux-x86_64-3.4.10/bin/mongod
+# Required on some systems
+#WorkingDirectory=
+Restart=always
+ # Restart service after 10 seconds if node service crashes
+ RestartSec=10
+ # Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=mongodb-service
+#User=<alternate user>
+#Group=<alternate group>
+#Environment=NODE_ENV=
+
+[Install]
+WantedBy=multi-user.target

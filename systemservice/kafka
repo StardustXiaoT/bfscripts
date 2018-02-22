@@ -1,0 +1,46 @@
+#! /bin/sh
+# chkconfig: 2345 30 90
+# description: start zookeeper and kafka for brownfield
+# processname: kafka
+
+# Source function library
+. /etc/init.d/functions
+
+KAFKA=/opt/`ls /opt|grep kafka`
+
+case "$1" in
+start)
+  $KAFKA/bin/zookeeper-server-start.sh $KAFKA/config/zookeeper.properties &
+  echo $! > /var/run/zookeeper.pid
+  sleep 3
+  $KAFKA/bin/kafka-server-start.sh $KAFKA/config/server.properties &
+  echo $! > /var/run/kafka.pid
+  ;;
+stop)
+  $KAFKA/bin/kafka-server-stop.sh
+  rm -f /var/run/kafka.pid
+  sleep 3
+  $KAFKA/bin/zookeeper-server-stop.sh
+  rm -f /var/run/zookeeper.pid
+  ;;
+restart)
+  $0 stop
+  $0 start
+  ;;
+status)
+  if [ -e /var/run/zookeeper.pid ];then
+    echo Zookeeper is running, pid=`cat /var/run/zookeeper.pid` 
+  else
+    echo Zookeeper is NOT running
+  fi
+  if [ -e /var/run/kafka.pid ];then
+    echo Kafka is running, pid=`cat /var/run/kafka.pid`
+  else
+    echo Kafka is NOT running
+  fi
+  ;;
+*)
+  echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

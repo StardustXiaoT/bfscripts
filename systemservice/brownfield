@@ -1,0 +1,54 @@
+#! /bin/sh
+# chkconfig: 2345 35 60
+# description: start flume tomcat & activemq
+# processname: brownfield
+
+# Source function library
+. /etc/init.d/functions
+
+FLUME=/opt/`ls /opt|grep flume`
+ACTIVEMQ=/opt/`ls /opt|grep active`
+CATALINA_HOME=/opt/`ls /opt|grep tomcat`
+
+case "$1" in
+start)
+  $FLUME/bin/flume-ng agent -n a1 -c conf -f $FLUME/conf/flume-brownfield.properties &
+  echo $! > /var/run/flume.pid
+  $ACTIVEMQ/bin/activemq start
+  $CATALINA_HOME/bin/startup.sh
+  echo $! > /var/run/tomcat.pid
+  ;;
+stop)
+  $ACTIVEMQ/bin/activemq stop
+  kill -15 `cat /var/run/flume.pid`
+  rm -f /var/run/flume.pid
+  $KAFKA/bin/kafka-server-stop.sh
+  kill -15 `cat /var/run/tomcat.pid`
+  rm -f /var/run/tomcat.pid
+  ;;
+restart)
+  $0 stop
+  $0 start
+  ;;
+status)
+  if [ -e /var/run/flume.pid ];then
+    echo Flume is running, pid=`cat /var/run/flume.pid`
+  else
+    echo Flume is NOT running
+  fi
+  if [ -e $ACTIVEMQ/data/activemq.pid ];then
+    echo ActiveMQ is running, pid=`cat $ACTIVEMQ/data/activemq.pid`
+  else
+    echo ActiveMq is NOT running
+  fi
+  if [ -e /var/run/tomcat.pid ];then
+   echo Tomcat is running, pid=`cat /var/run/tomcat.pid`
+  else
+   echo Tomcat is NOT running
+  fi
+  ;;
+*)
+  echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0
